@@ -1,6 +1,6 @@
 {
     'name': 'Hermes AI Chatbox',
-    'version': '15.0.1.0.3',
+    'version': '15.0.1.0.5',
     'category': 'Tools',
     'summary': 'Read-only Odoo assistant powered by Hermes Agent',
     'author': 'Local',

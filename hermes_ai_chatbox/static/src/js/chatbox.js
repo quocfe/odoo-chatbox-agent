@@ -48,13 +48,17 @@ odoo.define('hermes_ai_chatbox.Chatbox', function (require) {
             this._append(text, 'o_hermes_user');
             this.$('.o_hermes_send').prop('disabled', true);
             this._append('Đang tra cứu Odoo...', 'o_hermes_pending');
-            ajax.jsonRpc('/hermes_ai/chat', 'call', {message: text}).then(function (res) {
+            ajax.jsonRpc('/hermes_ai/chat', 'call', {message: text}, {shadow: true}).then(function (res) {
                 self.$('.o_hermes_pending').last().remove();
                 self._append(res.ok ? res.message : res.error, res.ok ? 'o_hermes_bot' : 'o_hermes_error');
             }).guardedCatch(function () {
                 self.$('.o_hermes_pending').last().remove();
                 self._append('Lỗi kết nối chatbox.', 'o_hermes_error');
-            }).always(function () { self.$('.o_hermes_send').prop('disabled', false); });
+            }).then(function () {
+                self.$('.o_hermes_send').prop('disabled', false);
+            }, function () {
+                self.$('.o_hermes_send').prop('disabled', false);
+            });
         },
     });
 
