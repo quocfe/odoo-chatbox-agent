@@ -5,7 +5,7 @@ odoo.define('hermes_ai_chatbox.Chatbox', function (require) {
     var ajax = require('web.ajax');
 
     var Chatbox = Widget.extend({
-        template: 'HermesAIChatbox',
+        className: 'o_hermes_root',
         events: {
             'click .o_hermes_toggle': '_toggle',
             'click .o_hermes_close': '_close',
@@ -13,11 +13,19 @@ odoo.define('hermes_ai_chatbox.Chatbox', function (require) {
             'keydown .o_hermes_input': '_keydown',
         },
         start: function () {
-            this._super.apply(this, arguments);
+            var self = this;
+            this.$el.html(
+                '<button class="o_hermes_toggle" title="Hermes AI">AI</button>' +
+                '<div class="o_hermes_panel o_hermes_hidden">' +
+                '<div class="o_hermes_header"><b>Hermes AI · Odoo</b><button class="o_hermes_close">×</button></div>' +
+                '<div class="o_hermes_messages"><div class="o_hermes_message o_hermes_bot">Xin chào! Em chỉ tra cứu dữ liệu Odoo, chưa thực hiện thay đổi.</div></div>' +
+                '<div class="o_hermes_composer"><textarea class="o_hermes_input" rows="2" placeholder="Hỏi về đơn hàng, tồn kho, hóa đơn..."></textarea><button class="o_hermes_send">Gửi</button></div>' +
+                '</div>'
+            );
             this.$panel = this.$('.o_hermes_panel');
             this.$messages = this.$('.o_hermes_messages');
             this.$input = this.$('.o_hermes_input');
-            return this;
+            return this._super.apply(this, arguments);
         },
         _toggle: function () {
             this.$panel.toggleClass('o_hermes_hidden');
@@ -43,12 +51,15 @@ odoo.define('hermes_ai_chatbox.Chatbox', function (require) {
             ajax.jsonRpc('/hermes_ai/chat', 'call', {message: text}).then(function (res) {
                 self.$('.o_hermes_pending').last().remove();
                 self._append(res.ok ? res.message : res.error, res.ok ? 'o_hermes_bot' : 'o_hermes_error');
-            }).guardedCatch(function (err) {
+            }).guardedCatch(function () {
                 self.$('.o_hermes_pending').last().remove();
                 self._append('Lỗi kết nối chatbox.', 'o_hermes_error');
             }).always(function () { self.$('.o_hermes_send').prop('disabled', false); });
         },
     });
 
-    new Chatbox(null).appendTo(document.body);
+    var core = require('web.core');
+    core.bus.on('web_client_ready', null, function () {
+        new Chatbox(null).appendTo(document.body);
+    });
 });
